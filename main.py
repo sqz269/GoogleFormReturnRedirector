@@ -39,12 +39,28 @@ class GoogleFormRetrunRedirector(object):
         self.message_filterer = GmailMessageFilterer([], self.logger, filter_rules)
 
         self.cmd_to_description = {
-            "1": "Run Redirector (Resend emails based on Email receiver and Subject)"
+            "1": "Run Redirector (Resend emails based on Email receiver and Subject)",
+            "2": "Reset Data (Delete token.pickle, and other configuration files. But will NOT delete credits.json"
         }
 
         self.cmd_to_function = {
-            "1": self.redirector
+            "1": self.redirector,
+            "2": self.reset_data
         }
+
+    def reset_data(self):
+        self.logger.warning("This Action well delete token.pickle, configuration file and then exit the program (manual restart)")
+        confirm = KeyboardCommandProcessor.get_next_valid_input("Are you sure?", expected_values=["yes", "no", "y", "n"])
+        if confirm in ["yes", "y"]:
+            self.logger.info(f"Removing: {self.config_mgr.config_path}")
+            os.remove(self.config_mgr.config_path)
+            self.logger.info(f"Removing: {self.gmail_api.token_path}")
+            os.remove(self.gmail_api.token_path)
+            self.logger.info("Successfully deleted auth data and configuration file")
+            input("Press Enter To Exit")
+            sys.exit(0)
+        else:
+            return
 
     def print_options(self):
         print()
@@ -63,12 +79,16 @@ class GoogleFormRetrunRedirector(object):
         print()
         fetch_limit = KeyboardCommandProcessor.get_next_valid_input("How many email to fetch per request",
                                                                     default_value=50, target_type=int)
+
         email_subject = KeyboardCommandProcessor.get_next_valid_input("What's the email's subject should be (Regex is used here)",
                                                                       default_value="Score released:")
+
         to = KeyboardCommandProcessor.get_next_valid_input("What's the Email To should be (Domain)",
                                                            default_value="@ebrschools.org")
+
         print("\nNext two questions will asks about the date range of those emails")
         date_before = KeyboardCommandProcessor.get_next_valid_input("What's the before date (YYYY/MM/DD)", default_value="")
+
         date_after = KeyboardCommandProcessor.get_next_valid_input("What's the after date (YYYY/MM/DD)", default_value="")
 
         original_domain = KeyboardCommandProcessor.get_next_valid_input(f"What's the domain to be replaced",
@@ -122,6 +142,7 @@ class GoogleFormRetrunRedirector(object):
                 retarget = filtered_msg.To.replace(replaced_email_domain, replacing_email_domain)
                 self.logger.info(f"Retargeting email: {filtered_msg} -> {retarget}")
                 self.gmail_api.forward_email(filtered_msg, retarget)
+                print("")
         else:
             self.logger.warning("Operation Aborted")
 
