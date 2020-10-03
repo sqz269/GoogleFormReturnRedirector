@@ -44,4 +44,5 @@ class KeyboardCommandProcessor:
             "ERROR": 40,
             "FATAL": 50
         }
-        return logger_values[value.upper()]
+        lv = logger_values.get(value.upper(), "")
+        return lv if lv else int(value)
