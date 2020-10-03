@@ -40,6 +40,10 @@ class GmailMessageFilterer:
     def messages(self):
         return self.filtered_messages
 
+    def set_rules(self, rules: Union[GmailMessageFilterRules, GmailMessageFilterRulesCompiled]):
+        self.logger.info("Updating Gmail Message Filter Rules")
+        self.filter = self._compile_rules(rules)
+
     def _compile_rules(self, rules: Union[GmailMessageFilterRules, GmailMessageFilterRulesCompiled]) -> GmailMessageFilterRulesCompiled:
         """Compile GmailMessageFilterRules to callable functions
 
