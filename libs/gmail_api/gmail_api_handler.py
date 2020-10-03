@@ -1,10 +1,10 @@
 import base64
-from libs.gmail_message_formatter import GmailMessageFormatter
+from libs.gmail_api.gmail_message_formatter import GmailMessageFormatter
 from logging import Logger
 from typing import Any, Dict, List
 
 from googleapiclient.discovery import build
-from libs.credential_manger import CredentialManager
+from libs.gmail_api.credential_manger import CredentialManager
 
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart

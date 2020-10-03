@@ -1,5 +1,5 @@
 from logging import Logger
-from libs.gmail_message_formatter import GmailMessageFormatter
+from libs.gmail_api.gmail_message_formatter import GmailMessageFormatter
 from typing import List, Union, Callable
 import re
 
