@@ -1,4 +1,8 @@
 import base64
+from email.mime.audio import MIMEAudio
+from email.mime.base import MIMEBase
+from email.mime.image import MIMEImage
+
 from libs.gmail_api.gmail_message_formatter import GmailMessageFormatter
 from logging import Logger
 from typing import Any, Dict, List
@@ -42,13 +46,14 @@ class GmailAPIHandler(CredentialManager):
     def auth_service(self) -> None:
         self.service = build('gmail', 'v1', credentials=self.credentials)
 
-    def fetch_email(self, limit: int, label: str, userId: str="me") -> Dict[str, List[Dict[str, str]]]:
+    def fetch_email(self, limit: int, label: str, userId: str="me", q: str="") -> Dict[str, List[Dict[str, str]]]:
         """Fetches email from your gmail account
 
         Args:
             limit (int): The maximum number of email to fetch
             label (str): Only return messages with labels that match all of the specified label IDs.
             userId (str, optional): The user's email address. The special value me can be used to indicate the authenticated user. Defaults to "me".
+            q (str, optional): Only return messages matching the specified query. Supports the same query format as the Gmail search box. Defaults to "".
 
         Returns:
             Dict[str, List[Dict[str, str]]]: A list of message object. each message resource contains only an id and a threadId.
@@ -56,7 +61,7 @@ class GmailAPIHandler(CredentialManager):
         SeeAlso:
             https://developers.google.com/gmail/api/reference/rest/v1/users.messages/list
         """
-        return self.service.users().messages().list(userId=userId, maxResults=limit, labelIds=label).execute()
+        return self.service.users().messages().list(userId=userId, maxResults=limit, labelIds=label, q=q).execute()
 
     def get_email_details(self, id: str, userId: str="me", fmt: str=EMAIL_DETAIL_FORMATS.metadata):
         """Gets the specified email
@@ -118,5 +123,5 @@ class GmailAPIHandler(CredentialManager):
         return message    
 
     def get_labels(self) -> List[str]:
-        results: Dict[str, List[str]] = service.users().labels().list(userId='me').execute()
+        results: Dict[str, List[str]] = self.service.users().labels().list(userId='me').execute()
         return results.get('labels', [])
