@@ -1,3 +1,5 @@
+## This file is for setting up, to see how to use the program. go to CONFIG INSTRUCTIONS.pdf
+
 ### Step 1
 #### Go to: https://developers.google.com/gmail/api/quickstart/python
 ##### You should see this
@@ -61,6 +63,18 @@
 ### Step 12
 #### To execute the script, simply type in the Blue/Black window `py main.py`
 
+---
+
 ### Step 13
 #### NOTE: If you did step 7 - 12, Disregard the following steps
+#### Go to: https://github.com/sqz269/GoogleFormReturnRedirector/releases
+![Download Release](InstructionsImages/download_release.png)
+#### You might see this message. just click on the arrow and keep
+![Ignore warning](InstructionsImages/ignore_warning.png)
 
+### Step 14
+#### Extract the downloaded zip file
+![exe note](InstructionsImages/executable_note.png)
+
+### Step 15
+#### You are done, just run `main.exe` if you need to use it
