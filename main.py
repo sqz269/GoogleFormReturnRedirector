@@ -91,15 +91,20 @@ class GoogleFormRetrunRedirector(object):
         print(f"Additional email filters (Standard Query): {q}")
         print(f"Domain {replace_with} will be replacing {original_domain}. Example: JohnDoe{original_domain} -> JohnDoe{replace_with}\n")
         confirm_op = KeyboardCommandProcessor.get_next_valid_input("Is Above Information Correct?", expected_values=["yes", "no", "y", "n"])
+        if confirm_op in ["no", "n"]:
+            return
+        self.fetch_and_redirect(fetch_limit, q, email_subject, to, original_domain, replace_with)
 
-        self.fetch_and_redirect(fetch_limit, q, email_subject, to, replace_with)
-
-    def fetch_and_redirect(self, fetch_lim, fetch_query, rule_subject, rule_to, replace_email_domain):
+    def fetch_and_redirect(self, fetch_lim, fetch_query, rule_subject, rule_to, replaced_email_domain, replacing_email_domain):
         self.message_filterer.set_rules(GmailMessageFilterRules(rule_subject, rule_to, "."))
         messages = self.gmail_api.fetch_email(limit=fetch_lim, label=COMMON_LABELS.sent, q=fetch_query)["messages"]
+        msg_count = 0
         for m in messages:
+            msg_count += 1
+            self.logger.info(f"Getting details about messages: {msg_count}/{len(messages)}")
             data = GmailMessageFormatter(self.gmail_api.get_email_details(m["id"], fmt=EMAIL_DETAIL_FORMATS.full))
             self.message_filterer.add_message(data)
+        print()
 
         self.logger.info(f"Found {len(self.message_filterer.messages)} messages that matches given criteria")
         print_all = KeyboardCommandProcessor.get_next_valid_input("Display all matched email addresses",
@@ -108,13 +113,15 @@ class GoogleFormRetrunRedirector(object):
             for filtered_msg in self.message_filterer.messages:
                 print(f"Email: {filtered_msg.To} | Subject: {filtered_msg.Subject}")
 
-    def test(self):
-        messages = self.gmail_api.fetch_email(limit=1, label=COMMON_LABELS.sent)["messages"]
-        for i in messages:
-            data = GmailMessageFormatter(self.gmail_api.get_email_details(i["id"], fmt=EMAIL_DETAIL_FORMATS.full))
-            self.message_filterer.add_message(data)
-            self.gmail_api.forward_email(self.message_filterer.messages[0], "******@gmail.com")
+        proceed = KeyboardCommandProcessor.get_next_valid_input("Proceed?",
+                                                                expected_values=["yes", "no", "y", "n"])
+        if proceed in ["yes", "y"]:
+            for filtered_msg in self.message_filterer.messages:
+                retarget = filtered_msg.To.replace(replaced_email_domain, replacing_email_domain)
+                self.logger.info(f"Retargeting email: {filtered_msg} -> {retarget}")
+                self.gmail_api.forward_email(filtered_msg, retarget)
+        else:
+            self.logger.warning("Operation Aborted")
 
 redirector = GoogleFormRetrunRedirector()
 redirector.get_input_cmd()
-# redirector.test()
