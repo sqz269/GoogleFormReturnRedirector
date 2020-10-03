@@ -11,6 +11,7 @@ class ConfigManager:
     def __init__(self, config_path, logger: Logger):
         self.config_path = config_path
         self.config: ConfigParser = ConfigParser()
+        self.configuration = {}
         self.logger = logger
         self.logger.info(f"Using {config_path} as config file storage")
 
@@ -39,8 +40,14 @@ class ConfigManager:
             self.config.write(cfg)
 
     def _parse_config(self):
-        self.config["LOGGING"]["console_level"] = KeyboardCommandProcessor.parse_logger_value(self.config["LOGGING"]["console_level"])
-        self.config["LOGGING"]["file_level"] = KeyboardCommandProcessor.parse_logger_value(self.config["LOGGING"]["file_level"])
+        for sections in self.config.sections():
+            parse_sec = {}
+            for k in self.config[sections]:
+                parse_sec.update({k: self.config[sections][k]})
+            self.configuration.update({sections: parse_sec})
+
+        self.configuration["LOGGING"]["console_level"] = KeyboardCommandProcessor.parse_logger_value(self.configuration["LOGGING"]["console_level"])
+        self.configuration["LOGGING"]["file_level"] = KeyboardCommandProcessor.parse_logger_value(self.configuration["LOGGING"]["file_level"])
 
     def load_config(self) -> bool:
         """
@@ -51,11 +58,11 @@ class ConfigManager:
             self.logger.info("Configuration file loaded.")
 
             if isinstance(self.logger.handlers[0], logging.FileHandler):
-                self.logger.handlers[0].setLevel(self.config["LOGGING"]["file_level"])
-                self.logger.handlers[1].setLevel(self.config["LOGGING"]["console_level"])
+                self.logger.handlers[0].setLevel(self.configuration["LOGGING"]["file_level"])
+                self.logger.handlers[1].setLevel(self.configuration["LOGGING"]["console_level"])
             else:
-                self.logger.handlers[0].setLevel(self.config["LOGGING"]["console_level"])
-                self.logger.handlers[1].setLevel(self.config["LOGGING"]["file_level"])
+                self.logger.handlers[0].setLevel(self.configuration["LOGGING"]["console_level"])
+                self.logger.handlers[1].setLevel(self.configuration["LOGGING"]["file_level"])
 
             return True
         else:
