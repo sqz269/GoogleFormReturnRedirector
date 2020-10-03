@@ -1,10 +1,10 @@
-from typing import List, Any
+from typing import List, Any, Type
 
 
 class KeyboardCommandProcessor:
 
     @staticmethod
-    def get_next_valid_input(message, default_value=None, target_type=str, expected_values: List[str]=None, case_sensitive=False) -> Any:
+    def get_next_valid_input(message: str, default_value: Any=None, target_type: type=str, expected_values: List[str]=None, case_sensitive: bool=False) -> Any:
         if expected_values and not case_sensitive:
             expected_values = [i.lower() for i in expected_values]
 

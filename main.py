@@ -95,7 +95,9 @@ class GoogleFormRetrunRedirector(object):
             return
         self.fetch_and_redirect(fetch_limit, q, email_subject, to, original_domain, replace_with)
 
-    def fetch_and_redirect(self, fetch_lim, fetch_query, rule_subject, rule_to, replaced_email_domain, replacing_email_domain):
+    def fetch_and_redirect(self, fetch_lim: int, fetch_query: str,
+                           rule_subject: str, rule_to: str,
+                           replaced_email_domain: str, replacing_email_domain: str):
         self.message_filterer.set_rules(GmailMessageFilterRules(rule_subject, rule_to, "."))
         messages = self.gmail_api.fetch_email(limit=fetch_lim, label=COMMON_LABELS.sent, q=fetch_query)["messages"]
         msg_count = 0

@@ -8,7 +8,7 @@ from libs.keyboard_command_processor import KeyboardCommandProcessor
 
 class ConfigManager:
 
-    def __init__(self, config_path, logger: Logger):
+    def __init__(self, config_path: str, logger: Logger):
         self.config_path = config_path
         self.config: ConfigParser = ConfigParser()
         self.configuration = {}
