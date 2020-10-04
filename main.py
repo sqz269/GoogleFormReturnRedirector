@@ -96,6 +96,9 @@ class GoogleFormRetrunRedirector(object):
 
         date_after = KeyboardCommandProcessor.get_next_valid_input("What's the after date (YYYY/MM/DD)", default_value="")
 
+        additional_query = KeyboardCommandProcessor.get_next_valid_input("Any Additional queries (https://support.google.com/mail/answer/7190)?", default_value="")
+
+        print("\nNext two questions will ask about replacing domains")
         original_domain = KeyboardCommandProcessor.get_next_valid_input(f"What's the domain to be replaced",
                                                                         default_value="@ebrschools.org")
         replace_with = KeyboardCommandProcessor.get_next_valid_input(f"What should the original domain be replaced with",
@@ -103,17 +106,18 @@ class GoogleFormRetrunRedirector(object):
 
         q = ""
         if date_after and date_before:
-            q = f"after:{date_after} before:{date_before}"
+            q = f"after:{date_after} before:{date_before} "
         elif date_after:
-            q = f"after:{date_after}"
+            q = f"after:{date_after} "
         elif date_before:
-            q = f"before:{date_before}"
+            q = f"before:{date_before} "
+        q = q + additional_query
 
         self.logger.info("Operation Parameter Fulfilled")
         self.logger.warning("Please confirm the parameters")
         print(f"\nFetching {fetch_limit} emails per request.")
-        print(f"Only fetching emails with subject lines match \"{email_subject}\". To lines match: \"{to}\"")
-        print(f"Additional email filters (Standard Query): {q}")
+        print(f"Only fetching emails with subject lines match \"{email_subject}\". Email Receiver (To.) match: \"{to}\"")
+        print(f"Additional email filters (Gmail Query): {q}")
         print(f"Domain {replace_with} will be replacing {original_domain}. Example: JohnDoe{original_domain} -> JohnDoe{replace_with}\n")
         
         confirm_op = KeyboardCommandProcessor.get_next_yes_no_input("Is Above Information Correct?")
