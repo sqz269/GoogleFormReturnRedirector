@@ -15,6 +15,14 @@ class ConfigManager:
         self.logger = logger
         self.logger.info(f"Using {config_path} as config file storage")
 
+    @property
+    def CredentialJsonPath(self):
+        return self.configuration["CREDENTIALS"]["credentials_json_path"]
+
+    @property
+    def TokenPicklePath(self):
+        return self.configuration["CREDENTIALS"]["token_pickle_path"]
+
     def create_config(self) -> bool:
         self.logger.info(f"Creating a new configuration file at path: {self.config_path}")
 
@@ -67,3 +75,9 @@ class ConfigManager:
             return True
         else:
             return False
+
+    def update_config(self, section_name: str, key: str, new_value: str):
+        self.logger.info(f"Updating configuration value for [{section_name}][{key}]")
+        self.config[section_name][key] = new_value
+        with open(self.config_path, "w") as cfg:
+            self.config.write(cfg)

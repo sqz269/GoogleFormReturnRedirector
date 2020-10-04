@@ -33,7 +33,10 @@ class GoogleFormRetrunRedirector(object):
             self.config_mgr.create_config()
             self.config_mgr.load_config()
 
-        self.gmail_api = GmailAPIHandler(self.logger)
+        self.gmail_api = GmailAPIHandler(self.logger, 
+                                        token_store_path=self.config_mgr.TokenPicklePath, 
+                                        app_credential_path=self.config_mgr.CredentialJsonPath)
+        # TODO: If the credentails json path cannot be found, ask user to re-evaluate path
 
         filter_rules = GmailMessageFilterRules("Score released:", "@ebrschools.org", ".")
         self.message_filterer = GmailMessageFilterer([], self.logger, filter_rules)
