@@ -40,12 +40,14 @@ class GoogleFormRetrunRedirector(object):
 
         self.cmd_to_description = {
             "1": "Run Redirector (Resend emails based on Email receiver and Subject)",
-            "2": "Reset Data (Delete token.pickle, and other configuration files. But will NOT delete credits.json"
+            "2": "Reset Data (Delete token.pickle, and other configuration files. But will NOT delete credits.json",
+            "3": "Modify student roster (Add/Delete Student CSV files)"
         }
 
         self.cmd_to_function = {
             "1": self.redirector,
-            "2": self.reset_data
+            "2": self.reset_data,
+            "3": self.modify_student_roster
         }
 
     def reset_data(self):
@@ -73,6 +75,9 @@ class GoogleFormRetrunRedirector(object):
             user_input = KeyboardCommandProcessor.get_next_valid_input("Chose an option",
                                                                        expected_values=[str(i) for i in range(1, len(self.cmd_to_description)+1)])
             self.cmd_to_function[user_input]()
+
+    def modify_student_roster(self):
+        pass
 
     def redirector(self):
         self.logger.info("CSV Based email searching/replacing coming soon")
@@ -110,9 +115,11 @@ class GoogleFormRetrunRedirector(object):
         print(f"Only fetching emails with subject lines match \"{email_subject}\". To lines match: \"{to}\"")
         print(f"Additional email filters (Standard Query): {q}")
         print(f"Domain {replace_with} will be replacing {original_domain}. Example: JohnDoe{original_domain} -> JohnDoe{replace_with}\n")
-        confirm_op = KeyboardCommandProcessor.get_next_valid_input("Is Above Information Correct?", expected_values=["yes", "no", "y", "n"])
-        if confirm_op in ["no", "n"]:
+        
+        confirm_op = KeyboardCommandProcessor.get_next_yes_no_input("Is Above Information Correct?")
+        if not confirm_op:
             return
+
         self.fetch_and_redirect(fetch_limit, q, email_subject, to, original_domain, replace_with)
 
     def fetch_and_redirect(self, fetch_lim: int, fetch_query: str,
@@ -129,15 +136,14 @@ class GoogleFormRetrunRedirector(object):
         print()
 
         self.logger.info(f"Found {len(self.message_filterer.messages)} messages that matches given criteria")
-        print_all = KeyboardCommandProcessor.get_next_valid_input("Display all matched email addresses",
-                                                                  expected_values=["yes", "no", "y", "n"])
-        if print_all in ["yes", "y"]:
+
+        print_all = KeyboardCommandProcessor.get_next_yes_no_input("Display all matched email addresses")
+        if print_all:
             for filtered_msg in self.message_filterer.messages:
                 print(f"Email: {filtered_msg.To} | Subject: {filtered_msg.Subject}")
 
-        proceed = KeyboardCommandProcessor.get_next_valid_input("Proceed?",
-                                                                expected_values=["yes", "no", "y", "n"])
-        if proceed in ["yes", "y"]:
+        proceed = KeyboardCommandProcessor.get_next_yes_no_input("Proceed?")
+        if proceed:
             for filtered_msg in self.message_filterer.messages:
                 retarget = filtered_msg.To.replace(replaced_email_domain, replacing_email_domain)
                 self.logger.info(f"Retargeting email: {filtered_msg} -> {retarget}")

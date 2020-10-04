@@ -36,6 +36,18 @@ class KeyboardCommandProcessor:
                 print(f"Invalid input. Expected input to be a(n) {target_type}.")
 
     @staticmethod
+    def get_next_yes_no_input(message: str) -> bool:
+        """Get yes/no answer from the user
+
+        Args:
+            message (str): The message to display when asking for a yes/no answer
+
+        Returns:
+            bool: True if the user answered yes, otherwise, false
+        """
+        KeyboardCommandProcessor.get_next_valid_input(message=message, expected_values=["yes", "y", "no", "n"]) in ["yes", "y"]
+
+    @staticmethod
     def parse_logger_value(value: str) -> int:
         logger_values = {
             "DEBUG": 10,
