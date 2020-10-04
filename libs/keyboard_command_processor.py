@@ -45,7 +45,7 @@ class KeyboardCommandProcessor:
         Returns:
             bool: True if the user answered yes, otherwise, false
         """
-        KeyboardCommandProcessor.get_next_valid_input(message=message, expected_values=["yes", "y", "no", "n"]) in ["yes", "y"]
+        return KeyboardCommandProcessor.get_next_valid_input(message=message, expected_values=["yes", "y", "no", "n"]) in ["yes", "y"]
 
     @staticmethod
     def parse_logger_value(value: str) -> int:
