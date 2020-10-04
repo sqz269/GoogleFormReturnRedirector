@@ -11,8 +11,9 @@ from googleapiclient.discovery import build
 
 class CredentialManager:
     API_SCOPES: List[str] = ["https://www.googleapis.com/auth/gmail.modify",
-                             "https://www.googleapis.com/auth/classroom.courses.readonly",
-                             "https://www.googleapis.com/auth/classroom.rosters.readonly"]
+                            #  "https://www.googleapis.com/auth/classroom.courses.readonly",
+                            #  "https://www.googleapis.com/auth/classroom.rosters.readonly"
+                            ]
 
     def __init__(self, logger: Logger, token_store_path: str="", app_credential_path: str="credentials.json") -> None:
         self.logger = logger
