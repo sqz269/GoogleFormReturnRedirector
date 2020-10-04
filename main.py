@@ -99,9 +99,9 @@ class GoogleFormRetrunRedirector(object):
         additional_query = KeyboardCommandProcessor.get_next_valid_input("Any Additional queries (https://support.google.com/mail/answer/7190)?", default_value="")
 
         print("\nNext two questions will ask about replacing domains")
-        original_domain = KeyboardCommandProcessor.get_next_valid_input(f"What's the domain to be replaced",
+        original_domain = KeyboardCommandProcessor.get_next_valid_input("What's the domain to be replaced",
                                                                         default_value="@ebrschools.org")
-        replace_with = KeyboardCommandProcessor.get_next_valid_input(f"What should the original domain be replaced with",
+        replace_with = KeyboardCommandProcessor.get_next_valid_input("What should the original domain be replaced with",
                                                                      default_value="@ebrstudents.org")
 
         q = ""
@@ -128,7 +128,8 @@ class GoogleFormRetrunRedirector(object):
 
     def fetch_and_redirect(self, fetch_lim: int, fetch_query: str,
                            rule_subject: str, rule_to: str,
-                           replaced_email_domain: str, replacing_email_domain: str):
+                           replaced_email_domain: str, replacing_email_domain: str,
+                           delete_original_after_resent: bool):
         self.message_filterer.set_rules(GmailMessageFilterRules(rule_subject, rule_to, "."))
         messages = self.gmail_api.fetch_email(limit=fetch_lim, label=COMMON_LABELS.sent, q=fetch_query)["messages"]
         msg_count = 0
@@ -139,19 +140,20 @@ class GoogleFormRetrunRedirector(object):
             self.message_filterer.add_message(data)
         print()
 
-        self.logger.info(f"Found {len(self.message_filterer.messages)} messages that matches given criteria")
+        self.logger.info(f"Found {len(self.message_filterer.messages)} messages that match the given criteria")
 
         print_all = KeyboardCommandProcessor.get_next_yes_no_input("Display all matched email addresses")
         if print_all:
             for filtered_msg in self.message_filterer.messages:
-                print(f"Email: {filtered_msg.To} | Subject: {filtered_msg.Subject}")
+                print(f"Email: {filtered_msg.To} | Resent To: {filtered_msg.To.replace(replaced_email_domain, replacing_email_domain)} | Subject: {filtered_msg.Subject}")
 
         proceed = KeyboardCommandProcessor.get_next_yes_no_input("Proceed?")
         if proceed:
             for filtered_msg in self.message_filterer.messages:
                 retarget = filtered_msg.To.replace(replaced_email_domain, replacing_email_domain)
                 self.logger.info(f"Retargeting email: {filtered_msg} -> {retarget}")
-                self.gmail_api.forward_email(filtered_msg, retarget)
+                msg = self.gmail_api.forward_email(filtered_msg, retarget)
+                self.logger.info(f"Successfully send email to {retarget}. Email Id: {msg['id']}")
                 print("")
         else:
             self.logger.warning("Operation Aborted")

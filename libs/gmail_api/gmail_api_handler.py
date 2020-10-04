@@ -104,7 +104,6 @@ class GmailAPIHandler(CredentialManager):
             original (GmailMessageFormatter): The original message
             to (str): The email to forward to
         """
-        self.logger.info(f"Forwarding original email {original} to {to}")
         message = MIMEMultipart()
         message['to'] = to
         message['from'] = original.From
@@ -122,8 +121,7 @@ class GmailAPIHandler(CredentialManager):
 
     def send_message(self, message: Dict[str, str], user_id: str='me'):
         message = self.service.users().messages().send(userId=user_id, body=message).execute()
-        self.logger.info(f"Successfully send message. Message id: {message['id']}")  # TODO Remove this statement from the API Call
-        return message    
+        return message
 
     def get_labels(self) -> List[str]:
         results: Dict[str, List[str]] = self.service.users().labels().list(userId='me').execute()
