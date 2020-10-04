@@ -117,7 +117,7 @@ class GmailAPIHandler(CredentialManager):
 
         data = {'raw': base64.urlsafe_b64encode(message.as_string().encode()).decode()}
 
-        self.send_message(data)
+        return self.send_message(data)
 
     def send_message(self, message: Dict[str, str], user_id: str='me'):
         message = self.service.users().messages().send(userId=user_id, body=message).execute()

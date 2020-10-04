@@ -104,6 +104,8 @@ class GoogleFormRetrunRedirector(object):
         replace_with = KeyboardCommandProcessor.get_next_valid_input("What should the original domain be replaced with",
                                                                      default_value="@ebrstudents.org")
 
+        delete_after_send = KeyboardCommandProcessor.get_next_yes_no_input("Move original email to trash after sending it to the correct address?")
+
         q = ""
         if date_after and date_before:
             q = f"after:{date_after} before:{date_before} "
@@ -118,13 +120,14 @@ class GoogleFormRetrunRedirector(object):
         print(f"\nFetching {fetch_limit} emails per request.")
         print(f"Only fetching emails with subject lines match \"{email_subject}\". Email Receiver (To.) match: \"{to}\"")
         print(f"Additional email filters (Gmail Query): {q}")
-        print(f"Domain {replace_with} will be replacing {original_domain}. Example: JohnDoe{original_domain} -> JohnDoe{replace_with}\n")
-        
+        print(f"Domain {replace_with} will be replacing {original_domain}. Example: JohnDoe{original_domain} -> JohnDoe{replace_with}")
+        print(f"Delete Original Email after successful resent attempt: {delete_after_send}\n")
+
         confirm_op = KeyboardCommandProcessor.get_next_yes_no_input("Is Above Information Correct?")
         if not confirm_op:
             return
 
-        self.fetch_and_redirect(fetch_limit, q, email_subject, to, original_domain, replace_with)
+        self.fetch_and_redirect(fetch_limit, q, email_subject, to, original_domain, replace_with, delete_after_send)
 
     def fetch_and_redirect(self, fetch_lim: int, fetch_query: str,
                            rule_subject: str, rule_to: str,
@@ -144,8 +147,10 @@ class GoogleFormRetrunRedirector(object):
 
         print_all = KeyboardCommandProcessor.get_next_yes_no_input("Display all matched email addresses")
         if print_all:
+            print("")
             for filtered_msg in self.message_filterer.messages:
                 print(f"Email: {filtered_msg.To} | Resent To: {filtered_msg.To.replace(replaced_email_domain, replacing_email_domain)} | Subject: {filtered_msg.Subject}")
+            print("")
 
         proceed = KeyboardCommandProcessor.get_next_yes_no_input("Proceed?")
         if proceed:
@@ -154,6 +159,9 @@ class GoogleFormRetrunRedirector(object):
                 self.logger.info(f"Retargeting email: {filtered_msg} -> {retarget}")
                 msg = self.gmail_api.forward_email(filtered_msg, retarget)
                 self.logger.info(f"Successfully send email to {retarget}. Email Id: {msg['id']}")
+                if delete_original_after_resent:
+                    self.logger.info(f"Deleting original email with id: {filtered_msg.Id}")
+                    self.gmail_api.move_to_trash(filtered_msg.Id)
                 print("")
         else:
             self.logger.warning("Operation Aborted")

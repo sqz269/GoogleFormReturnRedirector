@@ -37,6 +37,10 @@ class GmailMessageFormatter:
         return ""
 
     @property
+    def Id(self):
+        return self.data['id']
+
+    @property
     def From(self):
         return self.search_header_value("From")
 
