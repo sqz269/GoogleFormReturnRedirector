@@ -8,7 +8,7 @@ from logging import Logger
 from typing import Any, Dict, List
 
 from googleapiclient.discovery import build
-from libs.gmail_api.credential_manger import CredentialManager
+from libs.api_shared.credential_manger import CredentialManager
 
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
@@ -91,6 +91,9 @@ class GmailAPIHandler(CredentialManager):
             msg.set_payload(data)
         return msg
 
+    def move_to_trash(self, id: str, userId: str="me"):
+        return self.service.users().messages().trash(userId=userId, id=id).execute()
+
     def forward_email(self, original: GmailMessageFormatter, to: str):
         """Forward email to an alternative address.
 
@@ -119,7 +122,7 @@ class GmailAPIHandler(CredentialManager):
 
     def send_message(self, message: Dict[str, str], user_id: str='me'):
         message = self.service.users().messages().send(userId=user_id, body=message).execute()
-        self.logger.info(f"Successfully send message. Message id: {message['id']}")
+        self.logger.info(f"Successfully send message. Message id: {message['id']}")  # TODO Remove this statement from the API Call
         return message    
 
     def get_labels(self) -> List[str]:
