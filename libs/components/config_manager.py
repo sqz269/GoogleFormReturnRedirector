@@ -3,7 +3,7 @@ from configparser import ConfigParser
 import os
 from logging import Logger
 
-from libs.keyboard_command_processor import KeyboardCommandProcessor
+from libs.utils.keyboard_command_processor import KeyboardCommandProcessor
 
 
 class ConfigManager:

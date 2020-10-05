@@ -3,13 +3,13 @@ import sys
 import os
 from logging import Logger
 
-from libs.config_manager import ConfigManager
+from libs.components.config_manager import ConfigManager
 from libs.gmail_api.gmail_api_handler import COMMON_LABELS, EMAIL_DETAIL_FORMATS, GmailAPIHandler
 from libs.gmail_api.gmail_message_filterer import (GmailMessageFilterer,
                                                    GmailMessageFilterRules)
 from libs.gmail_api.gmail_message_formatter import GmailMessageFormatter
-from libs.keyboard_command_processor import KeyboardCommandProcessor
-from libs.logger import init_logging
+from libs.utils.keyboard_command_processor import KeyboardCommandProcessor
+from libs.utils.logger import init_logging
 
 
 def global_exception_hook(exctype, value, tb):
