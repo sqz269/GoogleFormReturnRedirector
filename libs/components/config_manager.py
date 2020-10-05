@@ -83,8 +83,7 @@ class ConfigManager:
                 self.logger.handlers[1].setLevel(self.configuration["LOGGING"]["file_level"])
 
             return True
-        else:
-            return False
+        return False
 
     def update_config(self, section_name: str, key: str, new_value: str):
         self.logger.info(f"Updating configuration value for [{section_name}][{key}]")
