@@ -44,7 +44,8 @@ class GmailMessageFilterer:
         self.logger.info("Updating Gmail Message Filter Rules")
         self.filter = self._compile_rules(rules)
 
-    def _compile_rules(self, rules: Union[GmailMessageFilterRules, GmailMessageFilterRulesCompiled]) -> GmailMessageFilterRulesCompiled:
+    @staticmethod
+    def _compile_rules(rules: Union[GmailMessageFilterRules, GmailMessageFilterRulesCompiled]) -> GmailMessageFilterRulesCompiled:
         """Compile GmailMessageFilterRules to callable functions
 
         Args:

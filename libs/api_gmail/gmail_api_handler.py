@@ -79,7 +79,8 @@ class GmailAPIHandler(CredentialManager):
         """
         return self.service.users().messages().get(userId=userId, id=id, format=fmt).execute()
 
-    def make_payload(self, mime_type: str, sub_type: str, data: Any):
+    @staticmethod
+    def make_payload(mime_type: str, sub_type: str, data: Any):
         if mime_type == 'text':
             msg = MIMEText(data, _subtype=sub_type)
         elif mime_type == 'image':
