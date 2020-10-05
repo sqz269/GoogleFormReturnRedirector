@@ -15,7 +15,7 @@ class CredentialManager:
                             #  "https://www.googleapis.com/auth/classroom.rosters.readonly"
                             ]
 
-    def __init__(self, logger: Logger, token_store_path: str="", app_credential_path: str="credentials.json") -> None:
+    def __init__(self, logger: Logger, token_store_path: str = "", app_credential_path: str = "credentials.json") -> None:
         self.logger = logger
 
         self.logger.info(f"Using: {app_credential_path} for credentials.json")
@@ -44,7 +44,7 @@ class CredentialManager:
 
     def load_old_token(self):
         self.logger.debug(f"Attempting to load old tokens at: {self.token_path}")
-        with open('token.pickle', 'rb') as token:
+        with open(self.token_path, 'rb') as token:
             self.credentials = pickle.load(token)
 
     def grant_authorization(self):
