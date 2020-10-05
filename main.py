@@ -1,6 +1,8 @@
 import logging
+import math
 import sys
 import os
+import traceback
 from logging import Logger
 
 from libs.components.config_manager import ConfigManager
@@ -18,9 +20,15 @@ def global_exception_hook(exctype, value, tb):
         input()
         sys.exit(0)
     else:
-        sys.__excepthook__(exctype, value, tb)
+        print("\n\n")
+        print("UNHANDLED EXCEPTION HAS OCCURRED. THE PROGRAM MUST EXIT")
+        traceback.print_exception(exctype, value, tb)
+        print("\n\n")
+        input("Press Enter To Exit")
+
 
 sys.excepthook = global_exception_hook
+
 
 class GoogleFormRetrunRedirector(object):
 
@@ -86,6 +94,9 @@ class GoogleFormRetrunRedirector(object):
         fetch_limit = KeyboardCommandProcessor.get_next_valid_input("How many email to fetch per request",
                                                                     default_value=50, target_type=int)
 
+        total_email = KeyboardCommandProcessor.get_next_valid_input("How many emails to search in total",
+                                                                    default_value=100, target_type=int)
+
         email_subject = KeyboardCommandProcessor.get_next_valid_input("What's the email's subject should be (Regex is used here)",
                                                                       default_value="Score released:")
 
@@ -116,9 +127,12 @@ class GoogleFormRetrunRedirector(object):
             q = f"before:{date_before} "
         q = q + additional_query
 
+        iter_times = math.ceil(total_email / fetch_limit)
+
         self.logger.info("Operation Parameter Fulfilled")
         self.logger.warning("Please confirm the parameters")
         print(f"\nFetching {fetch_limit} emails per request.")
+        print(f"Fetching total of {total_email} emails. In {iter_times} Iterations. (Will actually fetch {iter_times * fetch_limit} emails")
         print(f"Only fetching emails with subject lines match \"{email_subject}\". Email Receiver (To.) match: \"{to}\"")
         print(f"Additional email filters (Gmail Query): {q}")
         print(f"Domain {replace_with} will be replacing {original_domain}. Example: JohnDoe{original_domain} -> JohnDoe{replace_with}")
@@ -128,23 +142,37 @@ class GoogleFormRetrunRedirector(object):
         if not confirm_op:
             return
 
-        self.fetch_and_redirect(fetch_limit, q, email_subject, to, original_domain, replace_with, delete_after_send)
+        self.fetch_and_redirect(fetch_limit, iter_times, q,
+                                email_subject, to,
+                                original_domain, replace_with,
+                                delete_after_send)
 
-    def fetch_and_redirect(self, fetch_lim: int, fetch_query: str,
+    def fetch_and_redirect(self, fetch_lim: int, fetch_iter: int, fetch_query: str,
                            rule_subject: str, rule_to: str,
                            replaced_email_domain: str, replacing_email_domain: str,
                            delete_original_after_resent: bool):
         self.message_filterer.set_rules(GmailMessageFilterRules(rule_subject, rule_to, "."))
-        messages = self.gmail_api.fetch_email(limit=fetch_lim, label=COMMON_LABELS.sent, q=fetch_query)["messages"]
-        msg_count = 0
-        for m in messages:
-            msg_count += 1
-            self.logger.info(f"Getting details about messages: {msg_count}/{len(messages)}")
-            data = GmailMessageFormatter(self.gmail_api.get_email_details(m["id"], fmt=EMAIL_DETAIL_FORMATS.full))
-            self.message_filterer.add_message(data)
+
+        pg_token = ""
+        for i in range(0, fetch_iter):
+            resp = self.gmail_api.fetch_email(limit=fetch_lim, label=COMMON_LABELS.sent, q=fetch_query, pageToken=pg_token)
+            self.logger.debug(f"Using page token: {pg_token}")
+            pg_token = resp["nextPageToken"]
+            messages = resp["messages"]
+            msg_count = 0
+            for m in messages:
+                msg_count += 1
+                self.logger.info(f"Getting details about messages: {msg_count}/{len(messages)}. (Iteration {i + 1}/{fetch_iter})")
+                data = GmailMessageFormatter(self.gmail_api.get_email_details(m["id"], fmt=EMAIL_DETAIL_FORMATS.full))
+                self.logger.debug(f"Got email subject: {data.Subject} | To: {data.To}")
+                self.message_filterer.add_message(data)
         print()
 
-        self.logger.info(f"Found {len(self.message_filterer.messages)} messages that match the given criteria")
+        if len(self.message_filterer.messages) == 0:
+            self.logger.warning("No emails found that matches the given criteria. Please check the filter parameters and try again")
+            return
+        else:
+            self.logger.info(f"Found {len(self.message_filterer.messages)} messages that match the given criteria")
 
         print_all = KeyboardCommandProcessor.get_next_yes_no_input("Display all matched email addresses")
         if print_all:
@@ -166,6 +194,7 @@ class GoogleFormRetrunRedirector(object):
                 print("")
         else:
             self.logger.warning("Operation Aborted")
+
 
 redirector = GoogleFormRetrunRedirector()
 redirector.get_input_cmd()

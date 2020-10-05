@@ -46,7 +46,7 @@ class GmailAPIHandler(CredentialManager):
     def auth_service(self) -> None:
         self.service = build('gmail', 'v1', credentials=self.credentials)
 
-    def fetch_email(self, limit: int, label: str, userId: str="me", q: str="") -> Dict[str, List[Dict[str, str]]]:
+    def fetch_email(self, limit: int, label: str, userId: str = "me", q: str = "", pageToken: str = "") -> Dict[str, List[Dict[str, str]]]:
         """Fetches email from your gmail account
 
         Args:
@@ -61,7 +61,7 @@ class GmailAPIHandler(CredentialManager):
         SeeAlso:
             https://developers.google.com/gmail/api/reference/rest/v1/users.messages/list
         """
-        return self.service.users().messages().list(userId=userId, maxResults=limit, labelIds=label, q=q).execute()
+        return self.service.users().messages().list(userId=userId, maxResults=limit, labelIds=label, q=q, pageToken=pageToken).execute()
 
     def get_email_details(self, id: str, userId: str="me", fmt: str=EMAIL_DETAIL_FORMATS.metadata):
         """Gets the specified email
