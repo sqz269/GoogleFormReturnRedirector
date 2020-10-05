@@ -43,14 +43,12 @@ class GoogleFormRetrunRedirector(object):
 
         self.cmd_to_description = {
             "1": "Run Redirector (Resend emails based on Email receiver and Subject)",
-            "2": "Reset Data (Delete token.pickle, and other configuration files. But will NOT delete credits.json",
-            "3": "Modify student roster (Add/Delete Student CSV files)"
+            "2": "Reset Data (Delete token.pickle, and other configuration files. But will NOT delete credits.json"
         }
 
         self.cmd_to_function = {
             "1": self.redirector,
-            "2": self.reset_data,
-            "3": self.modify_student_roster
+            "2": self.reset_data
         }
 
     def reset_data(self):
