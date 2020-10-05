@@ -3,7 +3,7 @@ from email.mime.audio import MIMEAudio
 from email.mime.base import MIMEBase
 from email.mime.image import MIMEImage
 
-from libs.gmail_api.gmail_message_formatter import GmailMessageFormatter
+from libs.api_gmail.gmail_message_formatter import GmailMessageFormatter
 from logging import Logger
 from typing import Any, Dict, List
 
