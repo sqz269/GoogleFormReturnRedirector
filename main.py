@@ -26,7 +26,7 @@ class GoogleFormRetrunRedirector(object):
 
     def __init__(self) -> None:
         self.logger: Logger = init_logging(name="REDIRECTOR", level_stdout=logging.DEBUG)
-        self.config_mgr = ConfigManager(os.path.join(os.getenv('LOCALAPPDATA'), 'form_return_redirector.ini'), self.logger)
+        self.config_mgr = ConfigManager(os.path.join(os.getenv('LOCALAPPDATA'), "FormReturnRedirector"), self.logger)
 
         if not self.config_mgr.load_config():
             self.logger.info("It looks like this is the first time this program ran on this computer. We need a few configurations to get things started")
@@ -36,7 +36,7 @@ class GoogleFormRetrunRedirector(object):
         self.gmail_api = GmailAPIHandler(self.logger, 
                                         token_store_path=self.config_mgr.TokenPicklePath, 
                                         app_credential_path=self.config_mgr.CredentialJsonPath)
-        # TODO: If the credentails json path cannot be found, ask user to re-evaluate path
+        # TODO: If the credentials json path cannot be found, ask user to re-evaluate path
 
         filter_rules = GmailMessageFilterRules("Score released:", "@ebrschools.org", ".")
         self.message_filterer = GmailMessageFilterer([], self.logger, filter_rules)

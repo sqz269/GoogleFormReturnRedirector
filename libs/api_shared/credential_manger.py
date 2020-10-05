@@ -18,10 +18,12 @@ class CredentialManager:
     def __init__(self, logger: Logger, token_store_path: str="", app_credential_path: str="credentials.json") -> None:
         self.logger = logger
 
-        self.token_store_path = token_store_path
+        self.logger.info(f"Using: {app_credential_path} for credentials.json")
+        self.logger.info(f"Using: {token_store_path} for token.pickle")
+
         self.app_credential_path = app_credential_path
         self.credentials: Credentials = None
-        self.token_path = os.path.join(self.token_store_path, "token.pickle")
+        self.token_path = token_store_path
         self.auth()
 
     def auth(self):

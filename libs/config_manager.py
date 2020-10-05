@@ -8,12 +8,13 @@ from libs.keyboard_command_processor import KeyboardCommandProcessor
 
 class ConfigManager:
 
-    def __init__(self, config_path: str, logger: Logger):
-        self.config_path = config_path
+    def __init__(self, config_dir_path: str, logger: Logger):
+        self.config_dir_path = config_dir_path
+        self.config_path = os.path.join(config_dir_path, "form_return_redirector.ini")
         self.config: ConfigParser = ConfigParser()
         self.configuration = {}
         self.logger = logger
-        self.logger.info(f"Using {config_path} as config file storage")
+        self.logger.info(f"Using {self.config_path} as config file storage")
 
     @property
     def CredentialJsonPath(self):
@@ -23,14 +24,23 @@ class ConfigManager:
     def TokenPicklePath(self):
         return self.configuration["CREDENTIALS"]["token_pickle_path"]
 
-    def create_config(self) -> bool:
+    @property
+    def ConfigurationDirectoryPath(self):
+        return self.config_dir_path
+
+    def create_config(self):
+        if not os.path.isdir(self.config_dir_path):
+            self.logger.info(f"Configuration Folder does not exist. Creating a new one at: {self.config_dir_path}")
+            os.makedirs(self.config_dir_path)
+
         self.logger.info(f"Creating a new configuration file at path: {self.config_path}")
 
         credentials_json_path = KeyboardCommandProcessor.get_next_valid_input("Enter path for credentials.json", target_type=str)
-        token_pickle_path = KeyboardCommandProcessor.get_next_valid_input("Enter path where you want to store token.pickle ", default_value="./")
+        token_pickle_path = KeyboardCommandProcessor.get_next_valid_input("Enter path where you want to store token.pickle ",
+                                                                          default_value=os.path.join(self.config_dir_path, "token.pickle"))
 
         self.config["CREDENTIALS"] = {"credentials_json_path": credentials_json_path,
-                                      "token_pickle_path": os.path.join(token_pickle_path, "token.pickle")}
+                                      "token_pickle_path": token_pickle_path}
 
         level_std_out = KeyboardCommandProcessor.get_next_valid_input("Enter the logger level for console output",
                                                       default_value="INFO",
