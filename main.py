@@ -22,7 +22,7 @@ def global_exception_hook(exctype, value, tb):
 
 sys.excepthook = global_exception_hook
 
-class GoogleFormRetrunRedirector(object):
+class GoogleFormRetrunRedirector():
 
     def __init__(self) -> None:
         self.logger: Logger = init_logging(name="REDIRECTOR", level_stdout=logging.DEBUG)
